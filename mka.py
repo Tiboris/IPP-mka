@@ -46,11 +46,12 @@ def check_args(): # TODO fix duplicated params
     try :       # not working still on stderr
         args = parser.parse_args()
     except :
-        print_err("", ARGS_ERR)
+        exit(ARGS_ERR)
     if args.find_non_finishing == args.minimize and args.minimize == True :
         print_err("Wrong combination of arguments", ARGS_ERR)
-    if args.help : 
+    if args.help : # fix help
         print(parser.format_help())
+        exit(0)
     return args
 #------------------------------------------------------------------------------
 def read_input(input_file):
@@ -60,7 +61,7 @@ def read_input(input_file):
                 input_file = file.read()
         except:
             print_err("Can not open file", READ_ERR)
-    else :
+    else:
         input_file = input_file.read()
     # Replacing any comments with space
     input_file=re.sub(COMM_REX,SP,input_file)
@@ -107,10 +108,9 @@ def scan(string,separator=','):
             i += 1
         else :
             return None 
-    print (result[FINISH])
+    for rule in result[RULES]:
+        print(rule)
     return result
-
-
 
 #------------------------------------------------------------------------------
 def empty_alphabet(alphabet): #TODO
