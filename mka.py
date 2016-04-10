@@ -14,6 +14,8 @@ WRIT_ERR = 3
 FORM_ERR = 60
 SEMS_ERR = 61
 DSKA_ERR = 62
+COMM_REX = '#.*'
+SP       = ' '
 #------------------------------FUNCTIONS---------------------------------------
 #------------------------------------------------------------------------------
 def check_args(): # TODO fix duplicated params
@@ -55,14 +57,49 @@ def read_input(input_file):
             print_err("Can not open file", READ_ERR)
     else :
         input_file = input_file.read()
+    # Replacing any comments with space
+    input_file=re.sub(COMM_REX,SP,input_file)
     return input_file
 #------------------------------------------------------------------------------
+def scan(string,separator=','):
+    result = ""
+    string = "({banany,jablka},{ahoj})"
+    i = 0
+    while(i < len(string)):
+        if string[i] == '(' :
+            i += 1
+            while (string[i] != ')'):
+                if (string[i] == '{'):  
+                    i += 1
+                    while (string[i] != '}'):
+                        print (string[i])
+                        result += string[i]
+                        i += 1
+                    print(result)
+                    i += 1
+                elif (re.match(separator,string[i]) != None):
+                    i += 1
+                elif (re.match(r'[\s]',string[i]) != None): # checking bonus
+                    i += 1
+                else :
+                    return None  
+            i += 1
+        elif( re.match(r'[\s]',string[i]) != None):
+            i += 1
+        else :
+            return None 
+        
+    return result
+
+
+
+#------------------------------------------------------------------------------
 def empty_alphabet(alphabet): #TODO
-    return True
+    return False
 #------------------------------------------------------------------------------
 def invalid_rules(input_str,states): #TODO 
 #pravidlo obsahuje stav resp. symbol, který není v množině stavů resp. vstupní abecedě,
-    return True
+    return False
 #------------------------------------------------------------------------------
 def in_states(start,states): #TODO počáteční stav nepatří do množiny stavů,
     return True
@@ -70,7 +107,18 @@ def in_states(start,states): #TODO počáteční stav nepatří do množiny stav
 def fin_states(fin_states,states): #TODO množina koncových stavů není podmnožinou množiny stavů.
     return True
 #------------------------------------------------------------------------------
-def valid_format(input_str): #TODO Kontrola spr8vnosti vstupu 
+def valid_format(M): #TODO Kontrola spravnosti vstupu mozno return M
+    if M == None:
+        return False
+    if empty_alphabet(M):
+        print("nenipravda")
+        return False
+    if invalid_rules(M,M):
+        return False
+    if not in_states(M,M):
+        return False
+    if not fin_states(M,M):
+        return False
     return True
 #------------------------------------------------------------------------------
 def is_dska(M): #TODO 
@@ -85,7 +133,8 @@ def print_err(msg,code):
 #-----------------------------MAIN-FUNCTION------------------------------------
 def main():
     args = check_args()
-    if not valid_format(read_input(args.input)) :
+    M = scan(read_input(args.input)) 
+    if not valid_format(M) :
         print_err("Input file is not in valid format", FORM_ERR)
     if not True :
         pass

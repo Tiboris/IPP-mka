@@ -1,2 +1,2 @@
 # mka
-Second project IPP - Minimalisation of finite state machine
+Second project IPP - Minimization of finite state machine
