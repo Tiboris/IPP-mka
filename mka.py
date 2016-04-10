@@ -7,6 +7,11 @@ import os                           # to work with filesystem
 import sys                          # to get arguments
 import argparse                     # to parse arguments
 #------------------------------------------------------------------------------
+STATES   = 0
+ALPHA    = 1 
+RULES    = 2
+START    = 3
+FINISH   = 4
 PROG_OK  = 0
 ARGS_ERR = 1
 READ_ERR = 2
@@ -62,22 +67,36 @@ def read_input(input_file):
     return input_file
 #------------------------------------------------------------------------------
 def scan(string,separator=','):
-    result = ""
-    string = "({banany,jablka},{ahoj})"
+    result = []
+    #string = "({banany,jablka},{ahoj},{puk},start,{luk})"
     i = 0
-    while(i < len(string)):
+    component = 1
+    while((i < len(string)) and (component < 6)):
         if string[i] == '(' :
             i += 1
             while (string[i] != ')'):
+                if (component == 4):
+                    tmp = ""
+                    while (re.match(separator,string[i]) == None):
+                        tmp += string[i]
+                        i += 1
+                    tmp=re.sub(r'[\s]','',tmp)
+                    tmp = tmp.split(separator)
+                    result.append(tmp)
                 if (string[i] == '{'):  
                     i += 1
+                    tmp = ""
                     while (string[i] != '}'):
-                        print (string[i])
-                        result += string[i]
+                        tmp += string[i]
                         i += 1
-                    print(result)
+                    tmp = re.sub(r'[\s+]','',tmp)
+                    tmp = tmp.split(separator)
+                    result.append(tmp)
                     i += 1
                 elif (re.match(separator,string[i]) != None):
+                    component += 1
+                    if (component > 5):
+                        return None
                     i += 1
                 elif (re.match(r'[\s]',string[i]) != None): # checking bonus
                     i += 1
@@ -88,7 +107,7 @@ def scan(string,separator=','):
             i += 1
         else :
             return None 
-        
+    print (result[FINISH])
     return result
 
 
@@ -108,16 +127,15 @@ def fin_states(fin_states,states): #TODO množina koncových stavů není podmno
     return True
 #------------------------------------------------------------------------------
 def valid_format(M): #TODO Kontrola spravnosti vstupu mozno return M
-    if M == None:
+    if (M == None):
         return False
-    if empty_alphabet(M):
-        print("nenipravda")
+    if (empty_alphabet(M[ALPHA])):
         return False
-    if invalid_rules(M,M):
+    if (invalid_rules(M[RULES],M[STATES])):
         return False
-    if not in_states(M,M):
+    if (not in_states(M[START],M[STATES])):
         return False
-    if not fin_states(M,M):
+    if (not in_states(M[FINISH],M[STATES])):
         return False
     return True
 #------------------------------------------------------------------------------
@@ -134,9 +152,9 @@ def print_err(msg,code):
 def main():
     args = check_args()
     M = scan(read_input(args.input)) 
-    if not valid_format(M) :
+    if (not valid_format(M)):
         print_err("Input file is not in valid format", FORM_ERR)
-    if not True :
+    if (not True):
         pass
     return PROG_OK
 #------------------------------------------------------------------------------
