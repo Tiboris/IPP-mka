@@ -7,6 +7,7 @@ import os                           # to work with filesystem
 import sys                          # to get arguments
 import argparse                     # to parse arguments
 #------------------------------------------------------------------------------
+PROG_OK  = 0
 ARGS_ERR = 1
 READ_ERR = 2
 WRIT_ERR = 3
@@ -38,9 +39,9 @@ def check_args(): # TODO fix duplicated params
     try :       # not working still on stderr
         args = parser.parse_args()
     except :
-        print_err("",ARGS_ERR)
+        print_err("", ARGS_ERR)
     if args.find_non_finishing == args.minimize and args.minimize == True :
-        print_err("Wrong combination of arguments",ARGS_ERR)
+        print_err("Wrong combination of arguments", ARGS_ERR)
     if args.help : 
         print(parser.format_help())
     return args
@@ -48,21 +49,47 @@ def check_args(): # TODO fix duplicated params
 def read_input(input_file):
     if input_file != sys.stdin :
         try:
-            input_file=open(input_file,'r')
+            with open(input_file,'r') as file :
+                input_file = file.read()
         except:
-            print_err("Can not open file",READ_ERR)
-    for line in input_file:
-        print(line)
+            print_err("Can not open file", READ_ERR)
+    else :
+        input_file = input_file.read()
+    return input_file
+#------------------------------------------------------------------------------
+def empty_alphabet(alphabet): #TODO
+    return True
+#------------------------------------------------------------------------------
+def invalid_rules(input_str,states): #TODO 
+#pravidlo obsahuje stav resp. symbol, který není v množině stavů resp. vstupní abecedě,
+    return True
+#------------------------------------------------------------------------------
+def in_states(start,states): #TODO počáteční stav nepatří do množiny stavů,
+    return True
+#------------------------------------------------------------------------------
+def fin_states(fin_states,states): #TODO množina koncových stavů není podmnožinou množiny stavů.
+    return True
+#------------------------------------------------------------------------------
+def valid_format(input_str): #TODO Kontrola spr8vnosti vstupu 
+    return True
+#------------------------------------------------------------------------------
+def is_dska(M): #TODO 
+# Pokud vstup nereprezentuje dobře specifikovaný konečný automat, skončí skript
+# s chybou a vrátí návratový kód 62
+    return True
 #------------------------------------------------------------------------------
 def print_err(msg,code):
-    print(msg)
+    print(msg,file=sys.stderr)
     exit(code)
 #------------------------------------------------------------------------------
 #-----------------------------MAIN-FUNCTION------------------------------------
 def main():
     args = check_args()
-    read_input(args.input)
-    return 0
+    if not valid_format(read_input(args.input)) :
+        print_err("Input file is not in valid format", FORM_ERR)
+    if not True :
+        pass
+    return PROG_OK
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
     exit(main())    
