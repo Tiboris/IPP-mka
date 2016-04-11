@@ -22,7 +22,8 @@ SEMS_ERR = 61
 DSKA_ERR = 62
 COMM_REX = '#.*'
 COMA_REX = ','
-WHTC_REX = '\s'
+WHTC_REX = '\s+'
+COMB_REX = '[\s+,]'
 SP       = ' '
 #------------------------------FUNCTIONS---------------------------------------
 #------------------------------------------------------------------------------
@@ -73,22 +74,25 @@ def read_input(input_file):
 def parse_rules(rules,states):
     for rule in rules:
         state = ""
-        rule = rule.split('->')
+        rule = rule.split('->') # fix bad rule
         dest = rule[1]
         left = rule[0]
         for i in range(0,len(left)):
             state += left[i]
-            if state in states:
-                alpha = re.sub('\'','',left[i+1:]) # \'([\p{L}\ ])\'
-                print((state,alpha,dest))
+            if state in states:                    # it match character and space
+                alpha = re.sub('\'','',left[i+1:]) # \'?([\p{L}\ ])\'?
+                #print((state,alpha,dest))
                 break
+            if (len(state)==len(left)):
+                print_err("Invalid rule in rules",FORM_ERR) 
 
 
     return rules
 #------------------------------------------------------------------------------
 def scan(string,separator=COMA_REX):
     result = []
-    #string = "({start,finish,banany,jablka},{a,b,e,c,e,d,a},{ruleZ},start,{finish})"
+    #separator = COMB_REX # TODO !!!!
+    #string = "({start,finish,banany,jablka},{a,b,e,c,e,d,a},{start->finish},start,{finish})"
     i = 0
     component = 1
     while((i < len(string)) and (component < 6)):
@@ -100,7 +104,7 @@ def scan(string,separator=COMA_REX):
                     while (re.match(separator,string[i]) == None):
                         tmp += string[i]
                         i += 1
-                    tmp = re.sub(r'[\s]','',tmp)
+                    tmp = re.sub(WHTC_REX,'',tmp)
                     tmp = tmp.split(separator)
                     result.append(tmp)
                 if (string[i] == '{'):  
@@ -110,18 +114,24 @@ def scan(string,separator=COMA_REX):
                         tmp += string[i]
                         i += 1
                     if separator == ',':
-                        tmp = re.sub(r'[\s+]','',tmp)
+                        tmp = re.sub(WHTC_REX,'',tmp)
+                        tmp = tmp.split(separator)
                     else:
-                        tmp = re.sub(r'[\s+]',SP,tmp) # maybe there
-                    tmp = tmp.split(separator)
+                        tmp = re.sub(COMB_REX,SP,tmp) # maybe there
+                        tmp = tmp.split()
+                        component += 1
                     result.append(tmp)
+                    #print (result)
                     i += 1
-                elif (re.match(separator,string[i]) != None):
+                elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
+                    i += 1
+                elif (separator != ','):
+                    if (re.match(COMA_REX,string[i]) != None):
+                        i += 1
+                elif ((re.match(separator,string[i]) != None) and (separator == ',')):
                     component += 1
                     if (component > 5):
                         return None
-                    i += 1
-                elif (re.match(r'[\s]',string[i]) != None): # checking bonus
                     i += 1
                 else :
                     return None  
@@ -180,10 +190,10 @@ def main():
     if (not True):
         pass
 
-    # for item in M:
-    #     print ("-----")
-    #     print (item) 
-
+    for item in M:
+        print ("-----")
+        print (item) 
+    print ("-----")
     return PROG_OK
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
