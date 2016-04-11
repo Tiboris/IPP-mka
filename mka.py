@@ -24,6 +24,7 @@ COMM_REX = '#.*'
 COMA_REX = ','
 WHTC_REX = '\s+'
 COMB_REX = '[\s+,]'
+REX = r'\s*\((\s*\{(.+?)\}\s*\,)(\s*\{(.+?)\}\s*\,)(\s*\{(.+?)\}\s*\,)(.*)\,(\s*\{(.+?)\}\s*)\)\s*'
 SP       = ' '
 #------------------------------FUNCTIONS---------------------------------------
 #------------------------------------------------------------------------------
@@ -83,18 +84,23 @@ def parse_rules(rules,states):
         for i in range(0,len(left)):
             state += left[i]
             if state in states:               
-                alpha = re.match(r"^\'?(.+?)\'?$",left[i+1:]) # -> TODO empty string 
-                output.update({state : {alpha.group(1): dest}})
+                alpha = left[i+1:]
+                output.update({state : {alpha : dest}})
                 break
             if (len(state)==len(left)):
                 print_err("Invalid rule in rules",FORM_ERR)    
+    #print (output)
     return output
 #------------------------------------------------------------------------------
 def scan(string,separator=COMA_REX):
     result = []
-    #separator = COMB_REX # TODO !!!!
-    #string = "({start,finish,banany,jablka},{a,b,e,c,e,d,a},{start->finish},start,{finish})"
+    #separator = COMB_REX # :-( Dont want to !!!!
+    #string = "({start,finish,banany,jablka},{'a','b','e','c','e','d','a'},{start'c'->finish},start,{finish})"
     i = 0
+    # abc = re.sub(WHTC_REX,' ',string)
+    # #print (abc)
+    # abc=re.match(REX,abc)
+    # print (abc.group(2))
     component = 1
     while((i < len(string)) and (component < 6)):
         if string[i] == '(' :
@@ -111,21 +117,19 @@ def scan(string,separator=COMA_REX):
                 if (string[i] == '{'):  
                     i += 1
                     tmp = ""
-                    while (string[i] != '}'):
+                    while (string[i] != '}'): # problem with space in ->
+                        if ((string[i] == '>') and (string[i-1] != '-')):
+                            return None
                         tmp += string[i]
                         i += 1
-                    if separator == ',':
+                    if separator == COMA_REX:    
                         tmp = re.sub(WHTC_REX,'',tmp)
                         tmp = tmp.split(separator)
-                        if component == 2:
-                            for item in tmp:
-                                pass 
                     else:
                         tmp = re.sub(COMB_REX,SP,tmp) # maybe there
                         tmp = tmp.split()
                         component += 1
                     result.append(tmp)
-                    #print (result)
                     i += 1
                 elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
                     i += 1
@@ -144,6 +148,7 @@ def scan(string,separator=COMA_REX):
             i += 1
         else :
             return None 
+    #print (result)
     result[RULES] = parse_rules(result[RULES],result[STATES])
     return result
 #------------------------------------------------------------------------------
@@ -153,9 +158,14 @@ def empty_alphabet(alphabet):
         chars += char
     return (len(chars) == 0)
 #------------------------------------------------------------------------------
-def invalid_rules(rules,states): #TODO 
-    for s in states:
-        print (s)
+def invalid_rules(rules,states,alphabet): 
+    for r in rules:
+        rule = rules[r]
+        for a in rule:
+            if (a not in alphabet):
+                return True
+            if (rule[a] not in states):
+                return True
     return False
 #------------------------------------------------------------------------------
 def in_states(to_search,all_states): 
@@ -169,7 +179,7 @@ def valid_format(M):
         return False
     if (empty_alphabet(M[ALPHA])):
         return False
-    if (invalid_rules(M[RULES],M[STATES])):
+    if (invalid_rules(M[RULES],M[STATES],M[ALPHA])):
         return False
     if (not in_states(M[START],M[STATES])):
         return False
@@ -195,10 +205,10 @@ def main():
     if (not True):
         pass
 
-    for item in M:
-        print ("-----")
-        print (item) 
-    print ("-----")
+    # for item in M:
+    #     print ("-----")
+    #     print (item) 
+    # print ("-----")
     return PROG_OK
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
