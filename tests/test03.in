@@ -1,0 +1,30 @@
+# složitější formátování vstupního automatu
+(
+{p, q, r},  # množina stavů, zde dia být nemůže jelikož vyžaduji C-like identifikátor
+{'á', '€'},     # abeceda,  # neprázdná
+{
+  # prázdný řádek, kde se nic nenačte, ale komentář se zahodí p b -> q # toto pravidlo by zavinilo chybu při kontrole dobré specifikovanosti
+	p 'á' -> q,
+	p'€' -> p,
+	q   'á'   ->   r,
+	q  '€' -> q,  
+	r'á'->q,
+	r      
+  '€' 
+  ->
+  
+  
+   p
+},
+p
+
+
+,                       {         
+   q}
+   # a už se blíží konec definice
+)
+# Výsledek jednuduché minimalizace konečného automatu:
+# p_r 'á' -> q.
+# p_r '€' -> p_r
+# q 'á' -> p_r
+# q '€' -> q

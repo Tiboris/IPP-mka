@@ -1,0 +1,15 @@
+# velmi jednoducha minimalizace - case insensitive
+(
+{P, q, R},
+{'0', '1'},
+{
+	p '0' -> q,
+	p '1' -> p,
+	q '0' -> r,
+	q '1' -> Q,
+	r '0' -> Q,
+	r '1' -> p
+},
+p,
+{Q}
+)

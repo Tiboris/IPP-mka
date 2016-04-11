@@ -1,0 +1,7 @@
+# automat neni dobre specifikovany, i kdyz syntakticky spravny
+p'0'-> q,
+p'r'-> p,
+q'0'-> r,
+q'1'-> q,
+r'0'-> q,
+r'1'-> p

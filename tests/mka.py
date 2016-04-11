@@ -6,7 +6,6 @@ import re                           # to searching by regex
 import os                           # to work with filesystem
 import sys                          # to get arguments
 import argparse                     # to parse arguments
-from collections import OrderedDict # 
 #------------------------------------------------------------------------------
 STATES   = 0
 ALPHA    = 1 
@@ -70,20 +69,9 @@ def read_input(input_file):
     input_file=re.sub(COMM_REX,SP,input_file)
     return input_file
 #------------------------------------------------------------------------------
-def parse_rules(rules,states):
+def parse_rules(rules):
     for rule in rules:
-        state = ""
-        rule = rule.split('->')
-        dest = rule[1]
-        left = rule[0]
-        for i in range(0,len(left)):
-            state += left[i]
-            if state in states:
-                alpha = re.sub('\'','',left[i+1:]) # \'([\p{L}\ ])\'
-                print((state,alpha,dest))
-                break
-
-
+        print (rule)
     return rules
 #------------------------------------------------------------------------------
 def scan(string,separator=COMA_REX):
@@ -112,7 +100,7 @@ def scan(string,separator=COMA_REX):
                     if separator == ',':
                         tmp = re.sub(r'[\s+]','',tmp)
                     else:
-                        tmp = re.sub(r'[\s+]',SP,tmp) # maybe there
+                        tmp = re.sub(r'[\s+]',SP,tmp)
                     tmp = tmp.split(separator)
                     result.append(tmp)
                     i += 1
@@ -130,10 +118,10 @@ def scan(string,separator=COMA_REX):
             i += 1
         else :
             return None 
-    result[RULES] = parse_rules(result[RULES],result[STATES])
+    result[RULES] = parse_rules(result[RULES])
     return result
 #------------------------------------------------------------------------------
-def empty_alphabet(alphabet):
+def empty_alphabet(alphabet): #TODO
     chars = ""
     for char in alphabet:
         chars += char
@@ -143,13 +131,13 @@ def invalid_rules(input_str,states): #TODO
 #pravidlo obsahuje stav resp. symbol, který není v množině stavů resp. vstupní abecedě,
     return False
 #------------------------------------------------------------------------------
-def in_states(to_search,all_states): 
+def in_states(to_search,all_states): #TODO počátečny a konecni stavy nepatří do množiny stavů,
     for q in to_search:
         if (q not in all_states):
             return False
     return True
 #------------------------------------------------------------------------------
-def valid_format(M):
+def valid_format(M): #TODO Kontrola spravnosti vstupu mozno return M
     if (M == None):
         return False
     if (empty_alphabet(M[ALPHA])):
@@ -180,9 +168,9 @@ def main():
     if (not True):
         pass
 
-    # for item in M:
-    #     print ("-----")
-    #     print (item) 
+    for item in M:
+        print ("-----")
+        print (item) 
 
     return PROG_OK
 #------------------------------------------------------------------------------
