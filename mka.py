@@ -72,22 +72,23 @@ def read_input(input_file):
     return input_file
 #------------------------------------------------------------------------------
 def parse_rules(rules,states):
+    output = OrderedDict()
     for rule in rules:
         state = ""
-        rule = rule.split('->') # fix bad rule
-        dest = rule[1]
-        left = rule[0]
+        part = rule.split('->') # fix bad rule
+        if (len(part[0]) == len(rule)):
+            print_err("Invalid rule in rules",FORM_ERR) 
+        left = part[0]
+        dest = part[1]
         for i in range(0,len(left)):
             state += left[i]
-            if state in states:                    # it match character and space
-                alpha = re.sub('\'','',left[i+1:]) # \'?([\p{L}\ ])\'?
-                #print((state,alpha,dest))
+            if state in states:               
+                alpha = re.match(r"^\'?(.+?)\'?$",left[i+1:]) # -> TODO empty string 
+                output.update({state : {alpha.group(1): dest}})
                 break
             if (len(state)==len(left)):
-                print_err("Invalid rule in rules",FORM_ERR) 
-
-
-    return rules
+                print_err("Invalid rule in rules",FORM_ERR)    
+    return output
 #------------------------------------------------------------------------------
 def scan(string,separator=COMA_REX):
     result = []
@@ -116,6 +117,9 @@ def scan(string,separator=COMA_REX):
                     if separator == ',':
                         tmp = re.sub(WHTC_REX,'',tmp)
                         tmp = tmp.split(separator)
+                        if component == 2:
+                            for item in tmp:
+                                pass 
                     else:
                         tmp = re.sub(COMB_REX,SP,tmp) # maybe there
                         tmp = tmp.split()
@@ -149,8 +153,9 @@ def empty_alphabet(alphabet):
         chars += char
     return (len(chars) == 0)
 #------------------------------------------------------------------------------
-def invalid_rules(input_str,states): #TODO 
-#pravidlo obsahuje stav resp. symbol, který není v množině stavů resp. vstupní abecedě,
+def invalid_rules(rules,states): #TODO 
+    for s in states:
+        print (s)
     return False
 #------------------------------------------------------------------------------
 def in_states(to_search,all_states): 
