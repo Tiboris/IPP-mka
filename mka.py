@@ -21,7 +21,7 @@ FORM_ERR = 60
 SEMS_ERR = 61
 DSKA_ERR = 62
 COMM_REX = '#.*'
-COMA_REX = ','
+COMA     = ','
 WHTC_REX = '\s+'
 COMB_REX = '[\s+,]'
 EMPTY    = ''
@@ -76,6 +76,7 @@ def read_input(input_file):
 def parse_rules(rules,states):
     output = OrderedDict()
     for rule in rules:
+        print (rule)
         state = ""
         part = rule.split('->') # fix bad rule
         if (len(part[0]) == len(rule)):
@@ -93,38 +94,82 @@ def parse_rules(rules,states):
     #print (output)
     return output
 #------------------------------------------------------------------------------
-def cut(tmp,rex,rep,split):
-    tmp = re.sub(COMB_REX,SP,tmp) # maybe there
-    tmp = tmp.split()
-    return tmp
+def convert_to_int(string):
+    try:
+        output = ord(string[1])
+    except:
+        print ("zle ",string)
+    return output
 #------------------------------------------------------------------------------
-def scan(string,separator=COMA_REX):
+def scan(string,separator=COMA):
     result = []
     #separator = COMB_REX # :-( Dont want to !!!!
-    string = "({start,finish,banany,jablka},{'a','b','e','c','e','d','a'},{start'c'->finish},start,{finish})"
+    #string = "({start,finish,banany,jablka},{'a','''','b','e','c','e','d','a'},{start'c'->finish},start,{finish})"
     i = 0
-
-    part = re.sub(WHTC_REX,' ',string)
-    REX = r'\s*\((\s*\{(.+?)\}\s*\,)(\s*\{(.+?)\}\s*\,)(\s*\{(.+?)\}\s*\,)(.*)\,(\s*\{(.+?)\}\s*)\)\s*'
-    part = re.match(REX,part)
-    # all states
-    #print (part.group(2))
-    result.append(cut(part.group(2),WHTC_REX,EMPTY,separator))
-    # alphabet
-    #print (part.group(4))
-    result.append(cut(part.group(4),WHTC_REX,EMPTY,separator))
-    # all rules
-    #print (part.group(6))    
-    result.append(cut(part.group(6),WHTC_REX,EMPTY,separator))
-    # starting state
-    #print (part.group(7))
-    result.append(cut(part.group(7),WHTC_REX,EMPTY,separator))
-    # all finishing states
-    #print (part.group(9))
-    result.append(cut(part.group(9),WHTC_REX,EMPTY,separator))
-
+    component = 1
+    while((i < len(string)) and (component < 6)):
+        if string[i] == '(' :
+            i += 1
+            while (string[i] != ')'):
+                if (component == 4):
+                    tmp = ""
+                    while (re.match(separator,string[i]) == None):
+                        tmp += string[i]
+                        i += 1
+                    tmp = re.sub(WHTC_REX,'',tmp)
+                    tmp = tmp.split(separator)
+                    result.append(tmp)
+                if (string[i] == '{'):  
+                    i += 1
+                    tmp = ""
+                    while (string[i] != '}'): # problem with space in ->
+                        if ((string[i] == '>') and (string[i-1] != '-')):
+                            return None
+                        if (string[i]=='\''):
+                            char = ""
+                            for x in range(0,3):
+                                if ((x == 2) and (string[i]!= '\'')):
+                                    print_err("Input file is not in valid format", FORM_ERR)
+                                char += string[i]
+                                i += 1
+                            char = convert_to_int(char)
+                            if (char == 39) and (string[i]!='\''):
+                                print_err("Input file is not in valid format", FORM_ERR)
+                            elif (char == 39):
+                                i += 1
+                            char = str(char)
+                            tmp += char
+                        else:
+                            tmp += string[i]
+                            i += 1
+                        #print (tmp)
+                    if separator == COMA:    
+                        tmp = re.sub(WHTC_REX,'',tmp)
+                        tmp = tmp.split(separator)
+                    else:
+                        tmp = re.sub(COMB_REX,SP,tmp) # maybe there
+                        tmp = tmp.split()
+                        component += 1
+                    result.append(tmp)
+                    i += 1
+                elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
+                    i += 1
+                elif (separator != ','):
+                    if (re.match(COMA,string[i]) != None):
+                        i += 1
+                elif ((re.match(separator,string[i]) != None) and (separator == ',')):
+                    component += 1
+                    if (component > 5):
+                        return None
+                    i += 1
+                else :
+                    return None  
+            i += 1
+        elif( re.match(r'[\s]',string[i]) != None):
+            i += 1
+        else :
+            return None 
     result[RULES] = parse_rules(result[RULES],result[STATES])
-    #print (result)
     return result
 #------------------------------------------------------------------------------
 def empty_alphabet(alphabet):
@@ -179,7 +224,7 @@ def main():
         print_err("Input file is not in valid format", FORM_ERR)
     if (not True):
         pass
-
+    
     for item in M:
         print ("-----")
         print (item) 
