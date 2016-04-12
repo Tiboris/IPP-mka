@@ -1,15 +1,2 @@
-(
-	{
-		s f q4 q2 , q1, q3
-	} 
-	{	
-		á # nějaký komentář
-		')' 
-	}, 
-	{ 
-		s á->f, f'á'->s s ')'->q3, s')' ->q4 q1'á'->q1 q2 á-> q2 q3 á ->q4
-		q4'á'-> q3, q1 ')' -> s q2')' ->f q3 ')'->q1, q4')'->q2 
-	}
-	s 
-	{f, s } 
-)
+start 'a' -> start, start 'b' -> stav2, stav2'a' -> stav2,#start je počáteční
+stav2 'b'-> stav1 ,stav1'a'-> stav1 ,stav1 'b'->start. # alalalala

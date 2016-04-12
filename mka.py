@@ -20,10 +20,10 @@ WRIT_ERR = 3
 FORM_ERR = 60
 SEMS_ERR = 61
 DSKA_ERR = 62
-COMM_REX = '#.*'
+COMM_REX = r'#.*'
 COMA     = ','
-WHTC_REX = '\s+'
-COMB_REX = '[\s+,]'
+WHTC_REX = r'\s+'
+COMB_REX = r'[\s+,]'
 EMPTY    = ''
 REX = r'\s*\((\s*\{(.+?)\}\s*\,)(\s*\{(.+?)\}\s*\,)(\s*\{(.+?)\}\s*\,)(.*)\,(\s*\{(.+?)\}\s*)\)\s*'
 SP       = ' '
@@ -49,6 +49,11 @@ def check_args(): # TODO fix duplicated params
     parser.add_argument('-i','--case-insensitive', required=False, 
                 help='ignoring input states strings case', 
                 action="store_true")
+    parser.add_argument('-r','--rules-only', required=False, 
+                help='input is in format rules only', 
+                action="store_true")
+    parser.add_argument('--analyse-string', required=False, 
+                help='analysing string passed as parameter')
     try :       # not working still on stderr
         args = parser.parse_args()
     except :
@@ -60,51 +65,62 @@ def check_args(): # TODO fix duplicated params
         exit(PROG_OK)
     return args
 #------------------------------------------------------------------------------
-def read_input(input_file):
-    if input_file != sys.stdin :
+def read_input(input_file,rules=False):
+    if (input_file != sys.stdin):
         try:
-            with open(input_file,'r') as file :
+            with open(input_file,'r') as file:
                 input_file = file.read()
         except:
             print_err("Can not open file", READ_ERR)
     else:
         input_file = input_file.read()
     # Replacing any comments with space
-    input_file=re.sub(COMM_REX,SP,input_file)
+    input_file = re.sub(COMM_REX,SP,input_file)
+    if (rules):
+        input_file = input_file.split(COMA)
     return input_file
+#------------------------------------------------------------------------------
+def prt(M):
+    A=M[RULES]
+    for item in A:
+        print ("-----")
+        print (A[item]) 
+    print ("-----")
 #------------------------------------------------------------------------------
 def parse_rules(rules,states):
     output = OrderedDict()
     for rule in rules:
-        print (rule)
-        state = ""
         part = rule.split('->') # fix bad rule
         if (len(part[0]) == len(rule)):
             print_err("Invalid rule in rules",FORM_ERR) 
         left = part[0]
         dest = part[1]
-        for i in range(0,len(left)):
-            state += left[i]
-            if state in states:               
-                alpha = left[i+1:]
-                output.update({state : {alpha : dest}})
-                break
-            if (len(state)==len(left)):
-                print_err("Invalid rule in rules",FORM_ERR)    
-    #print (output)
+        state = left[0:-1]
+        alph = left[-1]  
+        if (len(state) * len(alph) * len(dest) == 0):
+            print_err("Invalid rule in rules",FORM_ERR)
+        # hack ','
+        if alph == '°':
+            alph = ','
+        if state in output:
+            output[state].update({alph : dest})
+        else:
+            output.update({state : {alph : dest}})                      
     return output
 #------------------------------------------------------------------------------
-def convert_to_int(string):
-    try:
-        output = ord(string[1])
-    except:
-        print ("zle ",string)
+def convert(string,hack=False):
+    output = ord(string[1])
+    if hack:
+        for char in range(0,len(string)):
+            if string[char] == '°':
+                string[char] = ','
+        return string
     return output
 #------------------------------------------------------------------------------
 def scan(string,separator=COMA):
     result = []
-    #separator = COMB_REX # :-( Dont want to !!!!
-    #string = "({start,finish,banany,jablka},{'a','''','b','e','c','e','d','a'},{start'c'->finish},start,{finish})"
+    hack = False
+    #string = "({start,finish,banany,jablka},{'a',',','b','e','c','e','d','a'},{start','->finish},start,{finish})"
     i = 0
     component = 1
     while((i < len(string)) and (component < 6)):
@@ -123,41 +139,38 @@ def scan(string,separator=COMA):
                     i += 1
                     tmp = ""
                     while (string[i] != '}'): # problem with space in ->
-                        if ((string[i] == '>') and (string[i-1] != '-')):
+                        if ((component == 3) and (string[i] == '>') and (string[i-1] != '-')):
                             return None
                         if (string[i]=='\''):
                             char = ""
                             for x in range(0,3):
                                 if ((x == 2) and (string[i]!= '\'')):
-                                    print_err("Input file is not in valid format", FORM_ERR)
+                                    print_err("Input File is not in valid format", FORM_ERR)
                                 char += string[i]
                                 i += 1
-                            char = convert_to_int(char)
+                            char = convert(char)
+                            # hack ','
+                            if (char == 44):
+                                #print (ord('°'))
+                                hack = True
+                                char = 176
                             if (char == 39) and (string[i]!='\''):
-                                print_err("Input file is not in valid format", FORM_ERR)
+                                print_err("Input file is not in valid Format", FORM_ERR)
                             elif (char == 39):
                                 i += 1
-                            char = str(char)
+                            char = chr(char)
                             tmp += char
+                        elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
+                            i += 1
                         else:
                             tmp += string[i]
                             i += 1
-                        #print (tmp)
-                    if separator == COMA:    
-                        tmp = re.sub(WHTC_REX,'',tmp)
-                        tmp = tmp.split(separator)
-                    else:
-                        tmp = re.sub(COMB_REX,SP,tmp) # maybe there
-                        tmp = tmp.split()
-                        component += 1
+                    tmp = tmp.split(separator)
                     result.append(tmp)
                     i += 1
                 elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
                     i += 1
-                elif (separator != ','):
-                    if (re.match(COMA,string[i]) != None):
-                        i += 1
-                elif ((re.match(separator,string[i]) != None) and (separator == ',')):
+                elif (re.match(separator,string[i]) != None):
                     component += 1
                     if (component > 5):
                         return None
@@ -169,6 +182,9 @@ def scan(string,separator=COMA):
             i += 1
         else :
             return None 
+    #print(result)
+    if hack:
+        result[ALPHA] = convert(result[ALPHA],hack)
     result[RULES] = parse_rules(result[RULES],result[STATES])
     return result
 #------------------------------------------------------------------------------
@@ -180,6 +196,8 @@ def empty_alphabet(alphabet):
 #------------------------------------------------------------------------------
 def invalid_rules(rules,states,alphabet): 
     for r in rules:
+        if (r not in states):
+            return True
         rule = rules[r]
         for a in rule:
             if (a not in alphabet):
@@ -219,16 +237,18 @@ def print_err(msg,code):
 #-----------------------------MAIN-FUNCTION------------------------------------
 def main():
     args = check_args()
-    M = scan(read_input(args.input)) 
+    if not args.rules_only:
+        M = scan(read_input(args.input)) 
+    else :
+        M = read_input(args.input,args.rules_only)
+        print (M)
     if (not valid_format(M)):
         print_err("Input file is not in valid format", FORM_ERR)
     if (not True):
         pass
     
-    for item in M:
-        print ("-----")
-        print (item) 
-    print ("-----")
+    prt(M)
+    
     return PROG_OK
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
