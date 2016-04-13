@@ -76,8 +76,6 @@ def read_input(input_file,rules=False):
         input_file = input_file.read()
     # Replacing any comments with space
     input_file = re.sub(COMM_REX,SP,input_file)
-    if (rules):
-        input_file = input_file.split(COMA)
     return input_file
 #------------------------------------------------------------------------------
 def prt(M):
@@ -117,16 +115,30 @@ def convert(string,hack=False):
         return string
     return output
 #------------------------------------------------------------------------------
-def scan(string,separator=COMA):
+def scan(string,separator=COMA,rules_only=False):
+    i = 0 
+
+    if (rules_only):
+        m_start = string[i]
+        m_end = "\0"
+        b_start = string[i]
+        b_end = '\0'
+        component = 3
+    else:
+        m_start = '('
+        m_end = ')'
+        b_start = '{'
+        b_end = '}'
+        component = 1
     result = []
     hack = False
+
     #string = "({start,finish,banany,jablka},{'a',',','b','e','c','e','d','a'},{start','->finish},start,{finish})"
-    i = 0
-    component = 1
     while((i < len(string)) and (component < 6)):
-        if string[i] == '(' :
-            i += 1
-            while (string[i] != ')'):
+        if (string[i] == m_start) :
+            if (not rules_only):
+                i += 1
+            while ((i < len(string)) and (string[i] != m_end)):
                 if (component == 4):
                     tmp = ""
                     while (re.match(separator,string[i]) == None):
@@ -135,18 +147,25 @@ def scan(string,separator=COMA):
                     tmp = re.sub(WHTC_REX,'',tmp)
                     tmp = tmp.split(separator)
                     result.append(tmp)
-                if (string[i] == '{'):  
-                    i += 1
+                if (string[i] == b_start):  
+                    if (not rules_only):
+                        i += 1
                     tmp = ""
-                    while (string[i] != '}'): # problem with space in ->
-                        if ((component == 3) and (string[i] == '>') and (string[i-1] != '-')):
-                            return None
+                    while ((i < len(string)) and (string[i] != b_end) ): # problem with space in ->
+                    ##################################################
+                        # print(string[i])
+                        # print(i, string[i])
+                        if ((component == 3) and (string[i] == '>')):
+                            print (string[i])
+                            if (string[i-1] != '-'):
+                                return None
                         if (string[i]=='\''):
                             char = ""
                             for x in range(0,3):
                                 if ((x == 2) and (string[i]!= '\'')):
                                     print_err("Input File is not in valid format", FORM_ERR)
                                 char += string[i]
+                                # print(i, string[i])
                                 i += 1
                             char = convert(char)
                             # hack ','
@@ -162,11 +181,13 @@ def scan(string,separator=COMA):
                             tmp += char
                         elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
                             i += 1
+                            print(i)
                         else:
                             tmp += string[i]
                             i += 1
                     tmp = tmp.split(separator)
                     result.append(tmp)
+                    print (result)
                     i += 1
                 elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
                     i += 1
@@ -178,14 +199,17 @@ def scan(string,separator=COMA):
                 else :
                     return None  
             i += 1
-        elif( re.match(r'[\s]',string[i]) != None):
+        elif( re.match(WHTC_REX,string[i]) != None):
             i += 1
         else :
             return None 
     #print(result)
     if hack:
         result[ALPHA] = convert(result[ALPHA],hack)
-    result[RULES] = parse_rules(result[RULES],result[STATES])
+    if rules_only:
+        result = parse_rules(result[0],None)
+    else :
+        result[RULES] = parse_rules(result[RULES],result[STATES])
     return result
 #------------------------------------------------------------------------------
 def empty_alphabet(alphabet):
@@ -237,39 +261,19 @@ def print_err(msg,code):
 #-----------------------------MAIN-FUNCTION------------------------------------
 def main():
     args = check_args()
+
     if not args.rules_only:
         M = scan(read_input(args.input)) 
     else :
-        M = read_input(args.input,args.rules_only)
-        print (M)
+        M = scan(read_input(args.input),COMA,args.rules_only)
+        #print (M)
     if (not valid_format(M)):
         print_err("Input file is not in valid format", FORM_ERR)
     if (not True):
         pass
-    
-    prt(M)
     
     return PROG_OK
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
     exit(main())    
 #------------------------------------------------------------------------------
-
-# -f, --find-non-finishing -> hledá neukončující stav zadaného dobře specifikovaného
-# konečného automatu (automat se nevypisuje). Nalezne-li jej, bez odřádkování jej vypíše na
-# výstup; jinak vypíše pouze číslici 0. (Před hledáním se provede validace na dobrou specifiko-
-# vanost automatu.) Parametr nelze kombinovat s parametrem -m (resp. --minimize).
-
-# -m, --minimize -> provede minimalizaci dobře specifikovaného konečného automatu (viz algo-
-# ritmus IFJ, přednáška 11, snímek 23/35). Parametr nelze kombinovat s parametrem -f (resp.
-# --find-non-finishing).
-
-# -i, --case-insensitive -> nebude brán ohled na velikost znaků při porovnávání symbolů či
-# stavů (tj. a = A, ahoj = AhOj nebo A b = a B); ve výstupu potom budou všechna velká písmena
-# převedena na malá.
-
-# bonus 
-# -w, --white-char
-# -r, --rules-only
-# --analyze-string="retezec"
-# --wsfa
