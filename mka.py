@@ -79,14 +79,15 @@ def read_input(input_file,rules=False):
     return input_file
 #------------------------------------------------------------------------------
 def prt(M):
-    A=M[RULES]
+    A=M#[RULES]
     for item in A:
         print ("-----")
-        print (A[item]) 
+        print (item)#(A[item]) 
     print ("-----")
 #------------------------------------------------------------------------------
-def parse_rules(rules,states):
+def parse_rules(M):
     output = OrderedDict()
+    rules = M[RULES] # TODO if rules only
     for rule in rules:
         part = rule.split('->') # fix bad rule
         if (len(part[0]) == len(rule)):
@@ -100,6 +101,12 @@ def parse_rules(rules,states):
         # hack ','
         if alph == '°':
             alph = ','
+        if alph not in M[ALPHA]:
+            print_err("Invalid terminal in rules",FORM_ERR) #TODO RIGHT ERROR
+        if state not in M[STATES]:
+            print_err("Invalid state in rules",FORM_ERR) #TODO RIGHT ERROR
+        if dest not in M[STATES]:
+            print_err("Invalid state in rules",FORM_ERR) #TODO RIGHT ERROR
         if state in output:
             output[state].update({alph : dest})
         else:
@@ -153,11 +160,8 @@ def scan(string,separator=COMA,rules_only=False):
                     tmp = ""
                     while ((i < len(string)) and (string[i] != b_end) ): # problem with space in ->
                     ##################################################
-                        # print(string[i])
-                        # print(i, string[i])
                         if ((component == 3) and (string[i] == '>')):
-                            print (string[i])
-                            if (string[i-1] != '-'):
+                            if ((i==0) or (string[i-1] != '-')):
                                 return None
                         if (string[i]=='\''):
                             char = ""
@@ -165,7 +169,6 @@ def scan(string,separator=COMA,rules_only=False):
                                 if ((x == 2) and (string[i]!= '\'')):
                                     print_err("Input File is not in valid format", FORM_ERR)
                                 char += string[i]
-                                # print(i, string[i])
                                 i += 1
                             char = convert(char)
                             # hack ','
@@ -181,13 +184,11 @@ def scan(string,separator=COMA,rules_only=False):
                             tmp += char
                         elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
                             i += 1
-                            print(i)
                         else:
                             tmp += string[i]
                             i += 1
                     tmp = tmp.split(separator)
                     result.append(tmp)
-                    print (result)
                     i += 1
                 elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
                     i += 1
@@ -203,13 +204,12 @@ def scan(string,separator=COMA,rules_only=False):
             i += 1
         else :
             return None 
-    #print(result)
     if hack:
         result[ALPHA] = convert(result[ALPHA],hack)
     if rules_only:
         result = parse_rules(result[0],None)
     else :
-        result[RULES] = parse_rules(result[RULES],result[STATES])
+        result[RULES] = parse_rules(result)
     return result
 #------------------------------------------------------------------------------
 def empty_alphabet(alphabet):
@@ -266,12 +266,11 @@ def main():
         M = scan(read_input(args.input)) 
     else :
         M = scan(read_input(args.input),COMA,args.rules_only)
-        #print (M)
-    if (not valid_format(M)):
+    if (not valid_format(M)): # here argument for rules only
         print_err("Input file is not in valid format", FORM_ERR)
     if (not True):
         pass
-    
+    prt(M)
     return PROG_OK
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
