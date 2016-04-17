@@ -7,10 +7,18 @@
 		'á', ')' # alphabet
 	}, 
 	{
-		s 'á'->f, f 'á' ->s, s')'->q3, s ')' -> q4,
-		q1 'á'->q1, q2'á' -> q2, q3 'á'->q4, q4 'á'->
-		q3, q1 ')' -> s, q2')'
-		->f , q3 ')'->q1, q4')'->q2 # rules
+		s 'á'->f, 
+		f 'á' ->s, 
+		s')'->q3, 
+		s ')' -> q4,
+		q1 'á'->q1, 
+		q2'á' -> q2, 
+		q3 'á'->q4, 
+		q4 'á'->q3,
+		q1 ')' -> s, 
+		q2')'->f ,
+		q3 ')'->q1, 
+		q4')'->q2 # rules
 	}, # následuje komponenta definující počáteční stav
 	s
 	, {f, s } 

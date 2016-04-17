@@ -82,7 +82,7 @@ def prt(M):
     A=M#[RULES]
     for item in A:
         print ("-----")
-        print (item)#(A[item]) 
+        print (item) #(item)#
     print ("-----")
 #------------------------------------------------------------------------------
 def parse_rules(M):
@@ -182,7 +182,7 @@ def scan(string,separator=COMA,rules_only=False):
                                 i += 1
                             char = chr(char)
                             tmp += char
-                        elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
+                        elif (re.match(WHTC_REX,string[i]) != None):
                             i += 1
                         else:
                             tmp += string[i]
@@ -215,7 +215,9 @@ def scan(string,separator=COMA,rules_only=False):
 def empty_alphabet(alphabet):
     chars = ""
     for char in alphabet:
-        chars += char
+        if char in chars:
+            print_err("Duplicit characters in alphabet",9) #TODO right error
+        chars += char    
     return (len(chars) == 0)
 #------------------------------------------------------------------------------
 def invalid_rules(rules,states,alphabet): 

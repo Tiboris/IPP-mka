@@ -1,0 +1,22 @@
+# velmi jednoducha minimalizace
+(
+{s,f,q1,q2,q3,q4},
+{'a', 'b'},
+{
+s 'a' -> f,
+s 'b' -> q3,
+f 'a' -> s,
+f 'b' -> q4,
+q1 'a' -> q1,
+q1 'b' -> s,
+q2 'a' -> q2,
+q2 'b' -> f,
+q3 'a' -> q4,
+q3 'b' -> q1,
+q4 'a' -> q3,
+q4 'b' -> q2
+},
+s,
+{s,f}
+)
+
