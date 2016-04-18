@@ -181,6 +181,8 @@ def scan(string,separator=COMA,rules_only=False):
                             char = ""
                             for x in range(0,3):
                                 if ((x == 2) and (string[i]!= '\'')):
+                                    if string[i-1] == '\'':
+                                        print_err("Autoamata is not deterministic",DSKA_ERR)
                                     print_err("Input File is not in valid format", FORM_ERR)
                                 char += string[i]
                                 i += 1
@@ -286,7 +288,7 @@ def main():
         M = scan(read_input(args.input),COMA,args.rules_only)
     if (not valid_format(M)): # here argument for rules only
         print_err("Input file is not in valid format", FORM_ERR)
-    if (not True):
+    if (not is_dska(M)):
         pass
     prt(M)
 
