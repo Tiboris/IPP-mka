@@ -68,7 +68,7 @@ def check_args(): # TODO fix duplicated params
             print_err("Wrong combination of arguments", ARGS_ERR)
     return args
 #------------------------------------------------------------------------------
-def read_input(input_file,rules=False):
+def read_input(input_file,case_insensitive):
     if (input_file != sys.stdin):
         try:
             with open(input_file,'r') as file:
@@ -79,6 +79,8 @@ def read_input(input_file,rules=False):
         input_file = input_file.read()
     # Replacing any comments with space
     input_file = re.sub(COMM_REX,SP,input_file)
+    if case_insensitive:
+        return input_file.lower()
     return input_file
 #------------------------------------------------------------------------------
 def prt(M): # to delete
@@ -283,9 +285,9 @@ def main():
     args = check_args()
 
     if not args.rules_only:
-        M = scan(read_input(args.input)) 
+        M = scan(read_input(args.input, args.case_insensitive)) 
     else :
-        M = scan(read_input(args.input),COMA,args.rules_only)
+        M = scan(read_input(args.input, args.case_insensitive),COMA,args.rules_only)
     if (not valid_format(M)): # here argument for rules only
         print_err("Input file is not in valid format", FORM_ERR)
     if (not is_dska(M)):
