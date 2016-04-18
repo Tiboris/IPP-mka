@@ -1,2 +1,3 @@
-usage: mka.py [--help] [--input INPUT] [--output OUTPUT] [-m] [-f] [-i]
+usage: mka.py [--help] [--input INPUT] [--output OUTPUT] [-m] [-f] [-i] [-r]
+              [--analyse-string ANALYSE_STRING]
 mka.py: error: unrecognized arguments: -w

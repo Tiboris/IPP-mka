@@ -54,15 +54,18 @@ def check_args(): # TODO fix duplicated params
                 action="store_true")
     parser.add_argument('--analyse-string', required=False, 
                 help='analysing string passed as parameter')
-    try :       # not working still on stderr
+    try :   # not working still on stderr
         args = parser.parse_args()
     except :
         exit(ARGS_ERR)
     if args.find_non_finishing == args.minimize and args.minimize == True :
         print_err("Wrong combination of arguments", ARGS_ERR)
-    if args.help : # fix help
-        print(parser.format_help())
-        exit(PROG_OK)
+    if (args.help):
+        if (len(sys.argv) == 2):
+            print(parser.format_help())
+            exit(PROG_OK)
+        else :
+            print_err("Wrong combination of arguments", ARGS_ERR)
     return args
 #------------------------------------------------------------------------------
 def read_input(input_file,rules=False):
@@ -78,16 +81,20 @@ def read_input(input_file,rules=False):
     input_file = re.sub(COMM_REX,SP,input_file)
     return input_file
 #------------------------------------------------------------------------------
-def prt(M):
+def prt(M): # to delete
     A=M#[RULES]
     for item in A:
         print ("-----")
         print (item) #(item)#
     print ("-----")
 #------------------------------------------------------------------------------
-def parse_rules(M):
+def parse_rules(M,rules_only=False):
     output = OrderedDict()
-    rules = M[RULES] # TODO if rules only
+    if (rules_only):
+        rules = M# TODO if rules only
+        print(rules)
+    else :
+        rules = M[RULES] 
     for rule in rules:
         part = rule.split('->') # fix bad rule
         if (len(part[0]) == len(rule)):
@@ -98,27 +105,34 @@ def parse_rules(M):
         alph = left[-1]  
         if (len(state) * len(alph) * len(dest) == 0):
             print_err("Invalid rule in rules",FORM_ERR)
-        # hack ','
-        if alph == '°':
-            alph = ','
+        # hack
+        alph = xchange(alph)
         if alph not in M[ALPHA]:
-            print_err("Invalid terminal in rules",FORM_ERR) #TODO RIGHT ERROR
+            print_err("Invalid terminal in rules",SEMS_ERR)
         if state not in M[STATES]:
-            print_err("Invalid state in rules",FORM_ERR) #TODO RIGHT ERROR
+            print_err("Invalid state in rules",SEMS_ERR)
         if dest not in M[STATES]:
-            print_err("Invalid state in rules",FORM_ERR) #TODO RIGHT ERROR
+            print_err("Invalid state in rules",SEMS_ERR)
         if state in output:
+            if alph in output[state]:
+                print_err("Autoamata is not deterministic",DSKA_ERR)
             output[state].update({alph : dest})
         else:
             output.update({state : {alph : dest}})                      
     return output
 #------------------------------------------------------------------------------
+def xchange(char):
+    if ord(char) == 172:
+        return ' '  #32
+    if ord(char) == 174:
+        return ','  #34
+    return char
+#------------------------------------------------------------------------------
 def convert(string,hack=False):
     output = ord(string[1])
     if hack:
         for char in range(0,len(string)):
-            if string[char] == '°':
-                string[char] = ','
+            string[char]=xchange(string[char])
         return string
     return output
 #------------------------------------------------------------------------------
@@ -173,13 +187,17 @@ def scan(string,separator=COMA,rules_only=False):
                             char = convert(char)
                             # hack ','
                             if (char == 44):
-                                #print (ord('°'))
                                 hack = True
-                                char = 176
+                                char = 174
+                            # hack ' '
+                            if (char == 32):
+                                hack = True
+                                char = 172
+                            # jump over ''''
                             if (char == 39) and (string[i]!='\''):
                                 print_err("Input file is not in valid Format", FORM_ERR)
                             elif (char == 39):
-                                i += 1
+                                i += 1 #may be problem, will see
                             char = chr(char)
                             tmp += char
                         elif (re.match(WHTC_REX,string[i]) != None):
@@ -190,12 +208,10 @@ def scan(string,separator=COMA,rules_only=False):
                     tmp = tmp.split(separator)
                     result.append(tmp)
                     i += 1
-                elif (re.match(WHTC_REX,string[i]) != None): # checking bonus
+                elif (re.match(WHTC_REX,string[i]) != None):
                     i += 1
                 elif (re.match(separator,string[i]) != None):
                     component += 1
-                    if (component > 5):
-                        return None
                     i += 1
                 else :
                     return None  
@@ -204,10 +220,12 @@ def scan(string,separator=COMA,rules_only=False):
             i += 1
         else :
             return None 
+    if (component != 5 and not rules_only):
+        return None
     if hack:
         result[ALPHA] = convert(result[ALPHA],hack)
     if rules_only:
-        result = parse_rules(result[0],None)
+        result = parse_rules(result[0],True)
     else :
         result[RULES] = parse_rules(result)
     return result
@@ -215,8 +233,6 @@ def scan(string,separator=COMA,rules_only=False):
 def empty_alphabet(alphabet):
     chars = ""
     for char in alphabet:
-        if char in chars:
-            print_err("Duplicit characters in alphabet",9) #TODO right error
         chars += char    
     return (len(chars) == 0)
 #------------------------------------------------------------------------------
@@ -273,6 +289,7 @@ def main():
     if (not True):
         pass
     prt(M)
+
     return PROG_OK
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
