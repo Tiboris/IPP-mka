@@ -391,7 +391,6 @@ def minimize(M):
         for end in old_finish:
             if ((end in new_state) and (new_state not in M[FINISH])):
                 M[FINISH].append(new_state)
-    # need to sort values
     M[ALPHA].sort()
     M[STATES].sort()
     M[FINISH].sort()

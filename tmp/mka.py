@@ -26,7 +26,6 @@ WHTC_REX = r'\s+'
 COMB_REX = r'[\s+,]'
 EMPTY    = ''
 SP       = ' '
-
 #------------------------------FUNCTIONS---------------------------------------
 #------------------------------------------------------------------------------
 def check_args(): # TODO fix duplicated params
@@ -49,12 +48,8 @@ def check_args(): # TODO fix duplicated params
     parser.add_argument('-i','--case-insensitive', required=False, 
                 help='ignoring input states strings case', 
                 action="store_true")
-    parser.add_argument('-r','--rules-only', required=False, 
-                help='input is in format rules only', 
-                action="store_true")
-    parser.add_argument('--analyse-string', required=False, 
-                help='analysing string passed as parameter')
-    try :   # not working still on stderr
+
+    try :   # not working still on stderr, whatever
         args = parser.parse_args()
     except :
         exit(ARGS_ERR)
@@ -95,13 +90,13 @@ def parse_rules(M,rules_only=False):
         part = rule.split('->') # fix bad rule
         if (len(part[0]) == len(rule)):
             print_err("Invalid rule in rules",FORM_ERR) 
-        left = part[0]
-        dest = part[1]
-        state = left[0:-1]
+        left = part[0] # string in front of -> 
+        dest = part[1] # string at end of -> 
+        state = left[0:-1] # cutting one char
         alph = left[-1]  
         if (len(state) * len(alph) * len(dest) == 0):
             print_err("Invalid rule in rules",FORM_ERR)
-        # hack
+        # hack characters
         alph = xchange(alph)
         if alph not in M[ALPHA]:
             print_err("Invalid terminal in rules",SEMS_ERR)
@@ -111,14 +106,15 @@ def parse_rules(M,rules_only=False):
             print_err("Invalid state in rules",SEMS_ERR)
         if state in output:
             if alph in output[state]:
-                print_err("Automata is not deterministic",DSKA_ERR)
+                if (output[state][alph] != dest):
+                    print_err("Automata is not deterministic",DSKA_ERR)
             output[state].update({alph : dest})
         else:
             output.update({state : {alph : dest}})                      
     return output
 #------------------------------------------------------------------------------
-def xchange(char):
-    if ord(char) == 172:
+def xchange(char): # this is not very cool but it works:replacing space anf coma
+    if ord(char) == 172: 
         return ' '  #32
     if ord(char) == 174:
         return ','  #34
@@ -134,25 +130,13 @@ def convert(string,hack=False):
 #------------------------------------------------------------------------------
 def scan(string,separator=COMA,rules_only=False):
     i = 0 
-    if (rules_only):
-        m_start = string[i]
-        m_end = "\0"
-        b_start = string[i]
-        b_end = '\0'
-        component = 3
-    else:
-        m_start = '('
-        m_end = ')'
-        b_start = '{'
-        b_end = '}'
-        component = 1
+    component = 1
     result = []
     hack = False
     while((i < len(string)) and (component < 6)):
-        if (string[i] == m_start) :
-            if (not rules_only):
-                i += 1
-            while ((i < len(string)) and (string[i] != m_end)):
+        if (string[i] == '(') :
+            i += 1
+            while ((i < len(string)) and (string[i] != ')')):
                 if (component == 4):
                     tmp = ""
                     while (re.match(separator,string[i]) == None):
@@ -161,11 +145,11 @@ def scan(string,separator=COMA,rules_only=False):
                     tmp = re.sub(WHTC_REX,'',tmp)
                     tmp = tmp.split(separator)
                     result.append(tmp)
-                if (string[i] == b_start):  
+                if (string[i] == '{'):  
                     if (not rules_only):
                         i += 1
                     tmp = ""
-                    while ((i < len(string)) and (string[i] != b_end) ): # problem with space in ->
+                    while ((i < len(string)) and (string[i] != '}') ): # problem with space in ->
                     ##################################################
                         if ((component == 3) and (string[i] == '>')):
                             if ((i==0) or (string[i-1] != '-')):
@@ -179,7 +163,6 @@ def scan(string,separator=COMA,rules_only=False):
                                             print_err("Input File is not in valid format", FORM_ERR)
                                         else:
                                             print_err("Input File is not in valid format", DSKA_ERR)
-                                    print_err("Input File is not in valid format", FORM_ERR)
                                 char += string[i]
                                 i += 1
                             char = convert(char)
@@ -203,8 +186,6 @@ def scan(string,separator=COMA,rules_only=False):
                         else:
                             tmp += string[i]
                             i += 1
-                    # if (len(M[FINISH]) == 0 && component != 1):
-                    #     print_err("Finishing states are empty",DSKA_ERR )
                     tmp = tmp.split(separator)
                     result.append(tmp)
                     i += 1
@@ -254,9 +235,9 @@ def in_states(to_search,all_states):
     for q in to_search:
         if (q not in all_states):
             return False
-        if re.match(r'^_',q) != None :
+        if re.match(r'_',q[0]) != None :
             return False
-        if re.match(r'_$',q) != None :
+        if re.match(r'_',q[-1]) != None :
             return False
         if re.match(r'\d',q[0]) != None:
             return False
@@ -265,6 +246,8 @@ def in_states(to_search,all_states):
 def valid_format(M):
     if (M == None):
         return False
+    if len(M[FINISH][0]) == 0:
+        print_err("Empty finishing states",DSKA_ERR )
     if (size_alphabet(M[ALPHA]) == 0):
         return False
     if (invalid_rules(M[RULES],M[STATES],M[ALPHA])):
@@ -272,6 +255,8 @@ def valid_format(M):
     if (not in_states(M[START],M[STATES])):
         return False
     if (not in_states(M[FINISH],M[STATES])):
+        return False
+    if (not in_states(M[STATES],M[STATES])):
         return False
     return True
 #------------------------------------------------------------------------------
@@ -366,6 +351,8 @@ def split_groups(groups,M):
     return groups
 #------------------------------------------------------------------------------
 def minimize(M):
+    M[ALPHA] = list(set(M[ALPHA]))
+    M[ALPHA].sort()
     finishing = M[FINISH]
     others = []
     groups = [finishing]
@@ -389,6 +376,8 @@ def minimize(M):
     M[START]= []
     M[FINISH]=[]
     for group in groups:
+        group = list(set(group))
+        group.sort()
         new_state = ""
         i = 1
         for state in group:
@@ -402,7 +391,6 @@ def minimize(M):
         for end in old_finish:
             if ((end in new_state) and (new_state not in M[FINISH])):
                 M[FINISH].append(new_state)
-    # need to sort values
     M[ALPHA].sort()
     M[STATES].sort()
     M[FINISH].sort()
@@ -420,9 +408,7 @@ def minimize(M):
                                 output[new_from].update({char : new_dest})
                             else:
                                 output.update({new_from : {char : new_dest}})
-                        # has to be sorted but somtimes it is not
     M[RULES] = output
-    #print (M[RULES]['f_s'].sort())
     return M
 #------------------------------------------------------------------------------
 def print_err(msg,code):
@@ -440,10 +426,13 @@ def print_res(M,output):
             rules = M[RULES]
             for rule in rules:
                 for key in M[ALPHA]:
+                    char = key
+                    if (key == "'"):
+                        char += "'"
                     if k == count_rules:
-                        result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +'\n')
+                        result += (rule +' \''+ char + '\' -> ' + rules[rule][key] +'\n')
                     else:
-                        result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +',\n')
+                        result += (rule +' \''+ char + '\' -> ' + rules[rule][key] +',\n')
                     k += 1
             result += '}'
         elif (i == START): 
@@ -453,6 +442,8 @@ def print_res(M,output):
             j = 1
             for item in component:
                 if i == ALPHA:
+                    if (item == "'"):
+                        item += "'"
                     result += '\''+item+'\''
                 else:
                     result += item
@@ -476,13 +467,21 @@ def print_res(M,output):
 #------------------------------------------------------------------------------
 #-----------------------------MAIN-FUNCTION------------------------------------
 def main():
+    dupl = []
+    for x in sys.argv:
+        io=re.search(r'^--(.+)=',x)
+        if io != None:
+            if io.group(0) in dupl:
+                print_err("Duplicit characters",ARGS_ERR)
+            dupl.append(io.group(0))
+        io=re.search(r'^--?([case|m|i|f]).*',x)
+        if io != None:
+            print(io.group(0))
+            if io.group(0) in dupl:
+                print_err("Duplicit characters",ARGS_ERR)
+            dupl.append(io.group(0))
     args = check_args()
-
-    if not args.rules_only:
-        M = scan(read_input(args.input, args.case_insensitive)) 
-    else :
-        M = scan(read_input(args.input, args.case_insensitive),COMA,args.rules_only)
-        exit(0)
+    M = scan(read_input(args.input, args.case_insensitive)) 
     if (not valid_format(M)): # here argument for rules only
         print_err("Input file is not in valid format", FORM_ERR)
     M[ALPHA].sort()
