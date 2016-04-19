@@ -1,0 +1,14 @@
+# chybna syntaxe
+(
+	{ p , q, r },
+  	{'0',''}, # prazdne apostrofy v abecede  	
+  	{ p'0'->q,				
+   	  p '1' -> p ,
+	  q'0'->r,
+	  q '1'-> q,
+	  r'0' -> q,
+	  r '1'-> p		
+	},
+	p ,
+	{ q}   
+)

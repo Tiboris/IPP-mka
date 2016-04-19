@@ -1,0 +1,17 @@
+# Pouziti neplatneho symbolu
+(
+	{ p , q, r },
+  	{'0','1'}, 	
+  	{ p'0' 		
+	  ->
+	  q,			
+   	  p '2' -> p , # symbol 2 neni v abecede
+	  q'0'->r,
+	  q '1'-> q,
+	  r'0' -> q,
+	  r
+	  '1'->	p		
+	},
+	p ,
+	{ q}   
+)			

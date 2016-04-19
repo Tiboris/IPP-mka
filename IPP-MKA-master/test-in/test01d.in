@@ -1,0 +1,17 @@
+# Opakovani stavu, symbolu a pravidel
+(
+	{ p , q, r, p, p, q, r },
+  	{'0','1', '0', '0', '1'}, 	
+  	{ p'0' -> q,			
+   	  p '1' -> p ,
+	  p '1' -> p ,
+	  q'0'->r,
+	  q '1'-> q,
+	  r'0' -> q,
+	  r
+	  '1'->	p,
+		p '1' -> p 		
+	},
+	p ,
+	{ q}   
+)			

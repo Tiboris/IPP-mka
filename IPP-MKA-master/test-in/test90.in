@@ -1,0 +1,12 @@
+# velmi jednoducha minimalizace - pouze pravidla
+	p '0'  ->  q.,
+	p '1'  ->  p,
+	q '0' ->   r,
+	q '1' ->   q,
+	r '0' ->   q,
+	r '1' ->   p
+# Výsledek jednoduché minimalizace konečného automatu:
+# p_r '0' -> q.
+# p_r '1' -> p_r
+# q '0' -> p_r
+# q '1' -> q

@@ -1,0 +1,15 @@
+# Chybne nazvy stavu
+# r_ - nesmi koncit podtrzitkem
+(
+	{ p , q, r_ },
+  	{'0','1'}, 	
+  	{ p'0' -> q,			
+   	  p '1' -> p ,
+	  q'0'->r_,
+	  q '1'-> q,
+	  r_'0' -> q,
+	  r_'1'->	p		
+	},
+	p ,
+	{ q}   
+)			

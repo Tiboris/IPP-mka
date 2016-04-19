@@ -25,8 +25,8 @@ COMA     = ','
 WHTC_REX = r'\s+'
 COMB_REX = r'[\s+,]'
 EMPTY    = ''
-REX = r'\s*\((\s*\{(.+?)\}\s*\,)(\s*\{(.+?)\}\s*\,)(\s*\{(.+?)\}\s*\,)(.*)\,(\s*\{(.+?)\}\s*)\)\s*'
 SP       = ' '
+
 #------------------------------FUNCTIONS---------------------------------------
 #------------------------------------------------------------------------------
 def check_args(): # TODO fix duplicated params
@@ -178,7 +178,10 @@ def scan(string,separator=COMA,rules_only=False):
                             for x in range(0,3):
                                 if ((x == 2) and (string[i]!= '\'')):
                                     if string[i-1] == '\'':
-                                        print_err("Input File is not in valid format", FORM_ERR)
+                                        if component == 2:
+                                            print_err("Input File is not in valid format", FORM_ERR)
+                                        else:
+                                            print_err("Input File is not in valid format", DSKA_ERR)
                                     print_err("Input File is not in valid format", FORM_ERR)
                                 char += string[i]
                                 i += 1
@@ -203,6 +206,8 @@ def scan(string,separator=COMA,rules_only=False):
                         else:
                             tmp += string[i]
                             i += 1
+                    # if (len(M[FINISH]) == 0 && component != 1):
+                    #     print_err("Finishing states are empty",DSKA_ERR )
                     tmp = tmp.split(separator)
                     result.append(tmp)
                     i += 1
@@ -252,9 +257,9 @@ def in_states(to_search,all_states):
     for q in to_search:
         if (q not in all_states):
             return False
-        if q[0] == '_':
+        if re.match(r'^_',q) != None :
             return False
-        if q[-1] == '_':
+        if re.match(r'_$',q) != None :
             return False
         if re.match(r'\d',q[0]) != None:
             return False
@@ -263,7 +268,6 @@ def in_states(to_search,all_states):
 def valid_format(M):
     if (M == None):
         return False
-    
     if (size_alphabet(M[ALPHA]) == 0):
         return False
     if (invalid_rules(M[RULES],M[STATES],M[ALPHA])):

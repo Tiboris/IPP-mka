@@ -1,0 +1,18 @@
+# nedeterministicky automat
+(
+	{ p , q, r },
+  	{'0','1'},  	
+  	{ p'0' 		
+	  ->
+	  q,				
+   	  p '1' -> p ,
+	  q'0'->r,
+	  q ''-> q, # epsilon prechod
+	  r'0' -> q,
+	  r '1'->	p		
+	},
+	p ,
+	{ q}   
+)			
+
+# konci chybou 62

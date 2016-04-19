@@ -1,0 +1,21 @@
+# vice znaku v uvozovkach
+(
+	{ p , q, r },
+  	{'	 ','
+'}, 	
+  	{ p'	 ' 		
+	  ->
+	  q,			
+   	  p '
+' -> p ,
+	  q'	'->r,
+	  q '
+'-> q,
+	  r'	' -> q,
+	  r
+	  '
+'->	p		
+	},
+	p ,
+	{ q}   
+)			

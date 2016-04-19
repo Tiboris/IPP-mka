@@ -81,6 +81,8 @@ def read_input(input_file,case_insensitive):
     input_file = re.sub(COMM_REX,SP,input_file)
     if case_insensitive:
         return input_file.lower()
+    if (len(imput_file) == 0):
+        print_err("Input file is empty",FORM_ERR)
     return input_file
 #------------------------------------------------------------------------------
 def parse_rules(M,rules_only=False):

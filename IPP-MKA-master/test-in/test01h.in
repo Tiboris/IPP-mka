@@ -1,0 +1,14 @@
+# Prazdna abeceda - chyba 61
+(
+	{ p , q, r },
+  	{}, 	
+  	{ p'0' -> q,			
+   	  p '1' -> p ,
+	  q'0'->r,
+	  q '1'-> q,
+	  r'0' -> q,
+	  r'1'-> p		
+	},
+	p ,
+	{ q}   
+)			

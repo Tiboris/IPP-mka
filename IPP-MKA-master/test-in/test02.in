@@ -1,0 +1,11 @@
+# http://www.cs.uky.edu/~lewis/essays/compilers/min-fa.html
+({s0, s1,s2,  s3, s4,s5,s6 ,s7},  {'a'  , 'b'}
+,{s0 'a' -> s1, s0 'b' -> s4, s1 'a' -> s5, 
+s1 'b' -> s2  , s2 'a' -> s3, s2 'b' -> s6,
+s3 'a' -> s3,
+s3 'b' -> s3,
+s4 'a' -> s1,
+
+s4 'b' -> s4 ,s5 'a' -> s1 ,s5 'b' -> s4, s6 'a' -> s3,
+s6'b'->s7,s7 'a'->s3,s7'b' ->s6}, s0, {s7})
+# Vysledek minimalizace je v test02.out
