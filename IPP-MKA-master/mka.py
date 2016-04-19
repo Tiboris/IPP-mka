@@ -134,7 +134,6 @@ def convert(string,hack=False):
 #------------------------------------------------------------------------------
 def scan(string,separator=COMA,rules_only=False):
     i = 0 
-
     if (rules_only):
         m_start = string[i]
         m_end = "\0"
@@ -149,8 +148,6 @@ def scan(string,separator=COMA,rules_only=False):
         component = 1
     result = []
     hack = False
-
-    #string = "({start,finish,banany,jablka},{'a',',','b','e','c','e','d','a'},{start','->finish},start,{finish})"
     while((i < len(string)) and (component < 6)):
         if (string[i] == m_start) :
             if (not rules_only):
@@ -279,7 +276,6 @@ def valid_format(M):
     return True
 #------------------------------------------------------------------------------
 def is_dska(M,non_fin,output): #TODO 
-
     rules = M[RULES]
     start = M[START]
     accessible = [start[0]]
@@ -428,7 +424,6 @@ def minimize(M):
     M[RULES] = output
     #print (M[RULES]['f_s'].sort())
     return M
-
 #------------------------------------------------------------------------------
 def print_err(msg,code):
     print(msg,file=sys.stderr)
@@ -478,7 +473,6 @@ def print_res(M,output):
             print_err("Can not write to file", WRIT_ERR)
     else:
         output.write(result)
-
 #------------------------------------------------------------------------------
 #-----------------------------MAIN-FUNCTION------------------------------------
 def main():
