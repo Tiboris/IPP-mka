@@ -475,7 +475,12 @@ def main():
             if io.group(0) in dupl:
                 print_err("Duplicit characters",ARGS_ERR)
             dupl.append(io.group(0))
-
+        io=re.search(r'^--?([case|m|i|f]).*',x)
+        if io != None:
+            print(io.group(0))
+            if io.group(0) in dupl:
+                print_err("Duplicit characters",ARGS_ERR)
+            dupl.append(io.group(0))
     args = check_args()
     M = scan(read_input(args.input, args.case_insensitive)) 
     if (not valid_format(M)): # here argument for rules only
