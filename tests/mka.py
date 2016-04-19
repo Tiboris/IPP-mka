@@ -265,7 +265,7 @@ def valid_format(M):
         return False
     return True
 #------------------------------------------------------------------------------
-def is_dska(M,non_fin): #TODO 
+def is_dska(M,non_fin,output): #TODO 
 
     rules = M[RULES]
     start = M[START]
@@ -300,9 +300,18 @@ def is_dska(M,non_fin): #TODO
     if non_fin :
         #vypis na vystup
         if len(non_finishing) == 1:
-            print(non_finishing[0])
+            result = non_finishing[0]
         else:
-            print(0)
+            result = 0
+        if (output != sys.stdout):
+            try:
+                with open(output,'w') as file:
+                    file.write(result)
+            except:
+                print_err("Can not write to file", WRIT_ERR)
+        else:
+            output.write(result)
+        exit(0)
     return True
 #------------------------------------------------------------------------------
 def equal_groups(A,Groups):
@@ -471,7 +480,7 @@ def main():
     M[FINISH].sort()
     if (not valid_format(M)): # here argument for rules only
         print_err("Input file is not in valid format", FORM_ERR)
-    if (not is_dska(M,args.find_non_finishing)):
+    if (not is_dska(M,args.find_non_finishing,args.output)):
         print_err("Autoamata is not deterministic",DSKA_ERR)
     if (args.minimize):
         M = minimize(M)
