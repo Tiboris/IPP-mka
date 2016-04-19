@@ -280,7 +280,7 @@ def size_of_alph(alphabet):
 def is_dska(M,non_fin): #TODO 
 
     rules = M[RULES]
-    accessible = []
+    accessible = [M[START]]
     candidates = []
     non_finishing = []
     alph_size = size_alphabet(M[ALPHA])
