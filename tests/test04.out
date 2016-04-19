@@ -2,20 +2,20 @@
 {s, f, q1, q2, q3, q4, trap},
 {'a', 'b'},
 {
-s 'b' -> q3,
 s 'a' -> trap,
-f 'b' -> q4,
+s 'b' -> q3,
 f 'a' -> s,
-q1 'b' -> s,
+f 'b' -> q4,
 q1 'a' -> q1,
-q3 'b' -> q1,
+q1 'b' -> s,
 q3 'a' -> q4,
-q4 'b' -> q2,
+q3 'b' -> q1,
 q4 'a' -> q3,
-q2 'b' -> f,
+q4 'b' -> q2,
 q2 'a' -> q2,
-trap 'b' -> trap,
-trap 'a' -> trap
+q2 'b' -> f,
+trap 'a' -> trap,
+trap 'b' -> trap
 },
 s,
 {f, s}
