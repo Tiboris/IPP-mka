@@ -234,11 +234,13 @@ def scan(string,separator=COMA,rules_only=False):
         result[RULES] = parse_rules(result)
     return result
 #------------------------------------------------------------------------------
-def empty_alphabet(alphabet):
+def size_alphabet(alphabet):
     chars = ""
     for char in alphabet:
+        if char in chars:
+            continue
         chars += char    
-    return (len(chars) == 0)
+    return len(chars)
 #------------------------------------------------------------------------------
 def invalid_rules(rules,states,alphabet): 
     for r in rules:
@@ -261,7 +263,7 @@ def in_states(to_search,all_states):
 def valid_format(M):
     if (M == None):
         return False
-    if (empty_alphabet(M[ALPHA])):
+    if (size_alphabet(M[ALPHA]) == 0):
         return False
     if (invalid_rules(M[RULES],M[STATES],M[ALPHA])):
         return False
@@ -271,9 +273,43 @@ def valid_format(M):
         return False
     return True
 #------------------------------------------------------------------------------
-def is_dska(M): #TODO 
-# Pokud vstup nereprezentuje dobře specifikovaný konečný automat, skončí skript
-# s chybou a vrátí návratový kód 62
+def size_of_alph(alphabet):
+    for c in alphabet:
+        pass
+#------------------------------------------------------------------------------
+def is_dska(M,non_fin): #TODO 
+
+    rules = M[RULES]
+    accessible = []
+    candidates = []
+    non_finishing = []
+    alph_size = size_alphabet(M[ALPHA])
+    for from_state in rules:
+        rule = rules[from_state]
+        for by in rule:
+            to_state = rule[by]
+            #print (from_state,by,to_state)
+            if (to_state != from_state):
+                accessible.append(to_state)
+            else:
+                candidates.append(to_state)
+    for state in M[STATES]:
+        count = 0
+        if (state not in accessible):
+            return False
+        for item in candidates:
+            if (item == state) :
+                count+=1
+        if (count == alph_size):
+            non_finishing.append(state)
+    if (len(non_finishing) > 1):
+        return False
+    if non_fin :
+        #vypis na vystup
+        if len(non_finishing) == 1:
+            print(non_finishing[0])
+        else:
+            print(0)
     return True
 #------------------------------------------------------------------------------
 def print_err(msg,code):
@@ -290,8 +326,8 @@ def main():
         M = scan(read_input(args.input, args.case_insensitive),COMA,args.rules_only)
     if (not valid_format(M)): # here argument for rules only
         print_err("Input file is not in valid format", FORM_ERR)
-    if (not is_dska(M)):
-        pass
+    if (not is_dska(M,args.find_non_finishing)):
+        print_err("Autoamata is not deterministic",DSKA_ERR)
     prt(M)
 
     return PROG_OK
