@@ -440,10 +440,13 @@ def print_res(M,output):
             rules = M[RULES]
             for rule in rules:
                 for key in M[ALPHA]:
+                    char = key
+                    if (key == "'"):
+                        char += "'"
                     if k == count_rules:
-                        result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +'\n')
+                        result += (rule +' \''+ char + '\' -> ' + rules[rule][key] +'\n')
                     else:
-                        result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +',\n')
+                        result += (rule +' \''+ char + '\' -> ' + rules[rule][key] +',\n')
                     k += 1
             result += '}'
         elif (i == START): 
@@ -453,6 +456,8 @@ def print_res(M,output):
             j = 1
             for item in component:
                 if i == ALPHA:
+                    if (item == "'"):
+                        item += "'"
                     result += '\''+item+'\''
                 else:
                     result += item
