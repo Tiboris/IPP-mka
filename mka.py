@@ -48,11 +48,7 @@ def check_args(): # TODO fix duplicated params
     parser.add_argument('-i','--case-insensitive', required=False, 
                 help='ignoring input states strings case', 
                 action="store_true")
-    parser.add_argument('-r','--rules-only', required=False, 
-                help='input is in format rules only', 
-                action="store_true")
-    parser.add_argument('--analyse-string', required=False, 
-                help='analysing string passed as parameter')
+
     try :   # not working still on stderr, whatever
         args = parser.parse_args()
     except :
@@ -250,6 +246,8 @@ def in_states(to_search,all_states):
 def valid_format(M):
     if (M == None):
         return False
+    if len(M[FINISH][0]) == 0:
+        print_err("Empty finishing states",DSKA_ERR )
     if (size_alphabet(M[ALPHA]) == 0):
         return False
     if (invalid_rules(M[RULES],M[STATES],M[ALPHA])):
@@ -470,12 +468,16 @@ def print_res(M,output):
 #------------------------------------------------------------------------------
 #-----------------------------MAIN-FUNCTION------------------------------------
 def main():
+    dupl = []
+    for x in sys.argv:
+        io=re.search(r'^--(.+)=',x)
+        if io != None:
+            if io.group(0) in dupl:
+                print_err("Duplicit characters",ARGS_ERR)
+            dupl.append(io.group(0))
+
     args = check_args()
-    if not args.rules_only:
-        M = scan(read_input(args.input, args.case_insensitive)) 
-    else :
-        M = scan(read_input(args.input, args.case_insensitive),COMA,args.rules_only)
-        exit(0)
+    M = scan(read_input(args.input, args.case_insensitive)) 
     if (not valid_format(M)): # here argument for rules only
         print_err("Input file is not in valid format", FORM_ERR)
     M[ALPHA].sort()

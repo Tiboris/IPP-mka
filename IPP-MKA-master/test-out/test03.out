@@ -1,3 +1,5 @@
+mka.py
+--input=./test-in/test03.in
 (
 {p, q, r},
 {'á', '€'},

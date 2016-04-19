@@ -48,11 +48,7 @@ def check_args(): # TODO fix duplicated params
     parser.add_argument('-i','--case-insensitive', required=False, 
                 help='ignoring input states strings case', 
                 action="store_true")
-    parser.add_argument('-r','--rules-only', required=False, 
-                help='input is in format rules only', 
-                action="store_true")
-    parser.add_argument('--analyse-string', required=False, 
-                help='analysing string passed as parameter')
+
     try :   # not working still on stderr, whatever
         args = parser.parse_args()
     except :
@@ -472,6 +468,14 @@ def print_res(M,output):
 #------------------------------------------------------------------------------
 #-----------------------------MAIN-FUNCTION------------------------------------
 def main():
+    dupl = []
+    for x in sys.argv:
+        io=re.search(r'^--(.+)=',x)
+        if io != None:
+            if io.group(0) in dupl:
+                print_err("Duplicit characters",ARGS_ERR)
+            dupl.append(io.group(0))
+
     args = check_args()
     M = scan(read_input(args.input, args.case_insensitive)) 
     if (not valid_format(M)): # here argument for rules only
