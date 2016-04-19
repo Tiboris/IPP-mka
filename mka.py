@@ -422,7 +422,7 @@ def print_res(M,output):
             rules = M[RULES]
             for rule in rules:
                 for key in rules[rule]:
-                    result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +'\n')
+                    result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +',\n')
             result += '}'
         elif (i == START): 
             result += component[0]
