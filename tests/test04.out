@@ -15,7 +15,7 @@ q4 'a' -> q3,
 q2 'b' -> f,
 q2 'a' -> q2,
 trap 'b' -> trap,
-trap 'a' -> trap,
+trap 'a' -> trap
 },
 s,
 {f, s}

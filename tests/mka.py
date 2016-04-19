@@ -365,46 +365,48 @@ def minimize(M):
         groups = split_groups(groups,M)
     # print("GROUPS---")
     # print(groups)
-    if (count != 1):  
-        old_finish = M[FINISH]
-        old_start = M[START][0]
-        old_rules = M[RULES]
-        M[STATES]=[]
-        M[RULES]= OrderedDict()
-        M[START]= []
-        M[FINISH]=[]
-        for group in groups:
-            new_state = ""
-            i = 1
-            for state in group:
-                if (i != 1):
-                    new_state += "_"
-                new_state += state
-                i += 1
-            M[STATES].append(new_state)
-            if (old_start in new_state):
-                M[START].append(new_state)
-            for end in old_finish:
-                if ((end in new_state) and (new_state not in M[FINISH])):
-                    M[FINISH].append(new_state)
-        for char in M[ALPHA]:
-            for state in old_rules:
-                rule = old_rules[state]
-                dest = rule[char]
-                for new_from in M[STATES]:
-                    if state in new_from :
-                        for new_dest in M[STATES]:
-                            if dest in new_dest:
-                                new_rule = {new_from : {char : new_dest}}
-                                output = M[RULES]
-                                if new_from in output:
-                                    output[new_from].update({char : new_dest})
-                                else:
-                                    output.update({new_from : {char : new_dest}})
-                            M[RULES] = output
-        return M # TODO RULEZ
-    else:
-        return M
+    
+    old_finish = M[FINISH]
+    old_start = M[START][0]
+    old_rules = M[RULES]
+    M[STATES]=[]
+    M[RULES]= OrderedDict()
+    M[START]= []
+    M[FINISH]=[]
+    for group in groups:
+        new_state = ""
+        i = 1
+        for state in group:
+            if (i != 1):
+                new_state += "_"
+            new_state += state
+            i += 1
+        M[STATES].append(new_state)
+        if (old_start in new_state):
+            M[START].append(new_state)
+        for end in old_finish:
+            if ((end in new_state) and (new_state not in M[FINISH])):
+                M[FINISH].append(new_state)
+    for char in M[ALPHA]:
+        for state in old_rules:
+            rule = old_rules[state]
+            dest = rule[char]
+            for new_from in M[STATES]:
+                if state in new_from :
+                    for new_dest in M[STATES]:
+                        output = M[RULES]
+                        if dest in new_dest:
+                            new_rule = {new_from : {char : new_dest}}
+                            if new_from in output:
+                                output[new_from].update({char : new_dest})
+                            else:
+                                output.update({new_from : {char : new_dest}})
+                        M[RULES] = output
+    M[STATES].sort()
+    M[ALPHA].sort()
+    M[FINISH].sort()
+    return M
+
 #------------------------------------------------------------------------------
 def print_err(msg,code):
     print(msg,file=sys.stderr)
@@ -413,13 +415,19 @@ def print_err(msg,code):
 def print_res(M,output):
     result="(\n"
     i = STATES
+    count_rules = len(M[RULES])*len(M[ALPHA]) 
     for component in M:
         if i == RULES:
+            k = 1
             result += '{\n'
             rules = M[RULES]
             for rule in rules:
                 for key in rules[rule]:
-                    result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +',\n')
+                    if k == count_rules:
+                        result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +'\n')
+                    else:
+                        result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +',\n')
+                    k += 1
             result += '}'
         elif (i == START): 
             result += component[0]
@@ -438,7 +446,7 @@ def print_res(M,output):
         if i != 4:
             result += ',\n'
         else:
-            result += '\n)\n'
+            result += '\n)'
         i += 1
     if (output != sys.stdout):
         try:

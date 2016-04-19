@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "mka.py", line 473, in <module>
-    exit(main())    
-  File "mka.py", line 468, in main
-    M = minimize(M)
-  File "mka.py", line 406, in minimize
-    M[RULES] = output
-UnboundLocalError: local variable 'output' referenced before assignment

@@ -127,6 +127,7 @@ $INTERPRETER $TASK.$EXTENSION -r -m --white-char --input=${LOCAL_IN_PATH}test93.
 echo -n $? > test93.!!!
 
 for i in `seq -w 1 93` ; do
+    
     t="test$i";
     retval=`cat ${LOG_PATH}$t".!!!"`;
     exp=`cat "ref-out/"$t".!!!"`;
