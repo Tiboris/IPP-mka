@@ -441,10 +441,16 @@ def print_res(M,output):
         if i != 4:
             result += ',\n'
         else:
-            result += '\n)'
+            result += '\n)\n'
         i += 1
-
-    print(result,file=output)
+    if (output != sys.stdout):
+        try:
+            with open(output,'w') as file:
+                input_file = file.write(result)
+        except:
+            print_err("Can not write to file", WRIT_ERR)
+    else:
+        input_file = input_file.write(result)
 
 #------------------------------------------------------------------------------
 #-----------------------------MAIN-FUNCTION------------------------------------
