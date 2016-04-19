@@ -87,7 +87,6 @@ def parse_rules(M,rules_only=False):
     output = OrderedDict()
     if (rules_only):
         rules = M# TODO if rules only
-        print(rules)
     else :
         rules = M[RULES] 
     for rule in rules:
@@ -216,9 +215,7 @@ def scan(string,separator=COMA,rules_only=False):
         elif( re.match(WHTC_REX,string[i]) != None):
             i += 1
         else :
-            print("asdf")
             return None 
-
     if (component != 5 and not rules_only):
         return None
     if hack:
@@ -446,11 +443,11 @@ def print_res(M,output):
     if (output != sys.stdout):
         try:
             with open(output,'w') as file:
-                input_file = file.write(result)
+                file.write(result)
         except:
             print_err("Can not write to file", WRIT_ERR)
     else:
-        input_file = input_file.write(result)
+        output.write(result)
 
 #------------------------------------------------------------------------------
 #-----------------------------MAIN-FUNCTION------------------------------------

@@ -83,18 +83,10 @@ def read_input(input_file,case_insensitive):
         return input_file.lower()
     return input_file
 #------------------------------------------------------------------------------
-def prt(M): # to delete
-    A=M#[RULES]
-    for item in A:
-        print ("-----")
-        print (item) #(item)#
-    print ("-----")
-#------------------------------------------------------------------------------
 def parse_rules(M,rules_only=False):
     output = OrderedDict()
     if (rules_only):
         rules = M# TODO if rules only
-        print(rules)
     else :
         rules = M[RULES] 
     for rule in rules:
@@ -273,26 +265,27 @@ def valid_format(M):
         return False
     return True
 #------------------------------------------------------------------------------
-def size_of_alph(alphabet):
-    for c in alphabet:
-        pass
-#------------------------------------------------------------------------------
 def is_dska(M,non_fin): #TODO 
 
     rules = M[RULES]
-    accessible = [M[START]]
+    start = M[START]
+    accessible = [start[0]]
     candidates = []
     non_finishing = []
     alph_size = size_alphabet(M[ALPHA])
     for from_state in rules:
         rule = rules[from_state]
+        number_of_rules = 0
         for by in rule:
+            number_of_rules += 1
             to_state = rule[by]
             #print (from_state,by,to_state)
             if (to_state != from_state):
                 accessible.append(to_state)
             else:
                 candidates.append(to_state)
+        if number_of_rules != alph_size:
+            return False
     for state in M[STATES]:
         count = 0
         if (state not in accessible):
@@ -303,7 +296,7 @@ def is_dska(M,non_fin): #TODO
         if (count == alph_size):
             non_finishing.append(state)
     if (len(non_finishing) > 1):
-        return True
+        return False
     if non_fin :
         #vypis na vystup
         if len(non_finishing) == 1:
@@ -312,9 +305,150 @@ def is_dska(M,non_fin): #TODO
             print(0)
     return True
 #------------------------------------------------------------------------------
+def equal_groups(A,Groups):
+    res = []
+    group_indexes = []
+    for state in A:
+        i = 0
+        for group in Groups:
+            if state in group:
+                group_indexes.append(i)
+            i += 1
+    for item in group_indexes:
+        if item not in res:
+            res.append(item)
+    return res # vracia list do ktorych mi padaju pravidla s pozitim jedneho prechodu
+#------------------------------------------------------------------------------
+def split_groups(groups,M):
+    rules = M[RULES]
+    to_remove = []
+    for char in M[ALPHA] :
+        for group in groups :
+            check = []
+            for state in group :
+                rule = rules[state]
+                check.append(rule[char])
+            diff_groups = equal_groups(check, groups)
+            if len(diff_groups) == 1:
+                #print("done ->",group)
+                continue
+            else :
+                for index in diff_groups:
+                    piece = []
+                    # hladam lave strany state ktore padnu do sf
+                    for state in group:
+                        rule=rules[state]
+                        if rule[char] in groups[index] :
+                            piece.append(state)                            
+                    groups.append(piece)
+                to_remove.append(group)
+            for item in to_remove:
+                groups.remove(item)
+            return groups
+    return groups
+#------------------------------------------------------------------------------
+def minimize(M):
+    finishing = M[FINISH]
+    others = []
+    groups = [finishing]
+    for state in M[STATES]:
+        if state not in finishing:
+            others.append(state)
+    groups.append(others)
+    old_groups = []
+    count = 0
+    while old_groups != groups:
+        count += 1
+        old_groups = []
+        for group in groups:
+            old_groups.append(group)
+        groups = split_groups(groups,M)
+    # print("GROUPS---")
+    # print(groups)
+    if (count != 1):  
+        old_finish = M[FINISH]
+        old_start = M[START][0]
+        old_rules = M[RULES]
+        M[STATES]=[]
+        M[RULES]= OrderedDict()
+        M[START]= []
+        M[FINISH]=[]
+        for group in groups:
+            new_state = ""
+            i = 1
+            for state in group:
+                if (i != 1):
+                    new_state += "_"
+                new_state += state
+                i += 1
+            M[STATES].append(new_state)
+            if (old_start in new_state):
+                M[START].append(new_state)
+            for end in old_finish:
+                if ((end in new_state) and (new_state not in M[FINISH])):
+                    M[FINISH].append(new_state)
+        for char in M[ALPHA]:
+            for state in old_rules:
+                rule = old_rules[state]
+                dest = rule[char]
+                for new_from in M[STATES]:
+                    if state in new_from :
+                        for new_dest in M[STATES]:
+                            if dest in new_dest:
+                                new_rule = {new_from : {char : new_dest}}
+                                output = M[RULES]
+                                if new_from in output:
+                                    output[new_from].update({char : new_dest})
+                                else:
+                                    output.update({new_from : {char : new_dest}})
+                            M[RULES] = output
+        return M # TODO RULEZ
+    else:
+        return M
+#------------------------------------------------------------------------------
 def print_err(msg,code):
     print(msg,file=sys.stderr)
     exit(code)
+#------------------------------------------------------------------------------
+def print_res(M,output):
+    result="(\n"
+    i = STATES
+    for component in M:
+        if i == RULES:
+            result += '{\n'
+            rules = M[RULES]
+            for rule in rules:
+                for key in rules[rule]:
+                    result += (rule +' \''+ key + '\' -> ' + rules[rule][key] +',\n')
+            result += '}'
+        elif (i == START): 
+            result += component[0]
+        else :
+            result += '{'
+            j = 1
+            for item in component:
+                if i == ALPHA:
+                    result += '\''+item+'\''
+                else:
+                    result += item
+                if j != len(component):
+                    result += ', '
+                j += 1
+            result += '}'
+        if i != 4:
+            result += ',\n'
+        else:
+            result += '\n)\n'
+        i += 1
+    if (output != sys.stdout):
+        try:
+            with open(output,'w') as file:
+                file.write(result)
+        except:
+            print_err("Can not write to file", WRIT_ERR)
+    else:
+        output.write(result)
+
 #------------------------------------------------------------------------------
 #-----------------------------MAIN-FUNCTION------------------------------------
 def main():
@@ -328,8 +462,9 @@ def main():
         print_err("Input file is not in valid format", FORM_ERR)
     if (not is_dska(M,args.find_non_finishing)):
         print_err("Autoamata is not deterministic",DSKA_ERR)
-    prt(M)
-
+    if (args.minimize):
+        M = minimize(M)
+    print_res(M,args.output)
     return PROG_OK
 #------------------------------------------------------------------------------
 if __name__ == "__main__":

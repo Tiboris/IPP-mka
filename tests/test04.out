@@ -1,0 +1,22 @@
+(
+{s, f, q1, q2, q3, q4, trap},
+{'a', 'b'},
+{
+s 'b' -> q3,
+s 'a' -> trap,
+f 'b' -> q4,
+f 'a' -> s,
+q1 'b' -> s,
+q1 'a' -> q1,
+q3 'b' -> q1,
+q3 'a' -> q4,
+q4 'b' -> q2,
+q4 'a' -> q3,
+q2 'b' -> f,
+q2 'a' -> q2,
+trap 'b' -> trap,
+trap 'a' -> trap,
+},
+s,
+{f, s}
+)
