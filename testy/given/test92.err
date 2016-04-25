@@ -1,1 +1,2 @@
-Invalid terminal in rules
+usage: mka.py [--help] [--input INPUT] [--output OUTPUT] [-m] [-f] [-i]
+mka.py: error: unrecognized arguments: -r

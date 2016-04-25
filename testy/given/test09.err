@@ -1,6 +1,1 @@
-Traceback (most recent call last):
-  File "mka.py", line 491, in <module>
-    exit(main())    
-  File "mka.py", line 478, in main
-    M[ALPHA].sort()
-TypeError: 'NoneType' object is not subscriptable
+Input file is not in valid format
