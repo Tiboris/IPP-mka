@@ -1,2 +1,0 @@
-start 'a' -> start, start 'b' -> stav2, stav2'a' -> stav2,#start je počáteční
-stav2 'b'-> stav1 ,stav1'a'-> stav1 ,stav1 'b'->start. # alalalala
