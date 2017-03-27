@@ -1,0 +1,28 @@
+machine:
+    environment:
+        SRC_PREFIX_DIR: ${HOME}/src
+        INSTALL_PREFIX_DIR: ${HOME}/opt
+        PATH: ${INSTALL_PREFIX_DIR}/py-351/bin:${PATH}
+
+test:
+    pre:
+        - mkdir -p ${SRC_PREFIX_DIR}
+        - mkdir -p ${INSTALL_PREFIX_DIR}py-351
+        - wget https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz
+        - tar -xvf Python-3.5.1.tgz -C ${SRC_PREFIX_DIR}
+        - cd ${SRC_PREFIX_DIR}/Python-3.5.1/ ; ./configure --prefix=${INSTALL_PREFIX_DIR}/py-351
+        - cd ${SRC_PREFIX_DIR}/Python-3.5.1/ ; make
+        #- cd ${SRC_PREFIX_DIR}/Python-3.5.1/ ; make test # causing error but works
+        - cd ${SRC_PREFIX_DIR}/Python-3.5.1/ ; make install
+
+        #- pyenv global 3.5.1
+        - which python
+        - python --version
+        - which python2
+        - python2 --version
+        - which python3
+        - python3 --version
+    override:
+        - ./zip_and_test.sh
+        - cd tests/students && ./stud_tests.sh
+        - cd tests/extended && ./test.sh
